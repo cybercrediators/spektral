@@ -2,6 +2,7 @@ import copy
 import warnings
 from functools import partial
 
+import math
 import numpy as np
 import tensorflow as tf
 from scipy import linalg
@@ -312,6 +313,33 @@ def chebyshev_filter(A, k, symmetric=True):
             T_k[i].sort_indices()
 
     return T_k
+
+
+def chebyshev_reparam_weights(K, weights, k):
+    """
+    Reparameterize the input trainable kernel to use it for ChebNet2.
+    :param K: K
+    :param kernel: trainable kernel
+    :param k: k (from current w_k)
+    :return: The reparameterized trainable weights for the filtering operation.
+    """
+    ret = tf.zeros((weights.shape[1], weights.shape[2]))
+
+    def chebyshev_recurrent(x, k):
+        if k == 0:
+            return 1
+        if k == 1:
+            return x
+        if k > 1:
+            return 2 * x * chebyshev_recurrent(x, k - 1) - chebyshev_recurrent(x, k - 2)
+
+    for j in range(0, K):
+        x_j = math.cos(((j + 0.5) * math.pi) / (K + 1))
+        T_k = chebyshev_recurrent(x_j, k)
+        ret += weights[j] * T_k
+    
+    ret = ret * (2 / (K + 1))
+    return ret
 
 
 def add_self_loops(a, value=1):

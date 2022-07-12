@@ -3,6 +3,7 @@ from .appnp_conv import APPNPConv
 from .arma_conv import ARMAConv
 from .censnet_conv import CensNetConv
 from .cheb_conv import ChebConv
+from .cheb_conv2 import ChebConv2
 from .crystal_conv import CrystalConv
 from .diffusion_conv import DiffusionConv
 from .ecc_conv import ECCConv
